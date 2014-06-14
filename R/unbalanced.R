@@ -49,7 +49,10 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     Qa <- t(D2) %*% Da
 
     ## geninv of Qa
-    Qai <- ginv(as.matrix(Qa))
+    if (require('rfunctions'))
+        Qai <- geninv(as.matrix(Qa))
+    else
+        Qai <- ginv(as.matrix(Qa))
     Qai <- Matrix(Qai)
 
     ## full value (added NA)
@@ -57,7 +60,6 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
 
     ## this should work on smaller matrices (formula 22)
     ## Pa <- (It - (D1 %*% dN2i %*% t(D1))) - (Da %*% Qai %*% t(Da))
-
 
     fia <- Qai %*% t(Da) %*% value
 

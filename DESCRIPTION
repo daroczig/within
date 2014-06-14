@@ -1,0 +1,13 @@
+Package: within
+Maintainer: Gergely Daróczi <daroczig@rapporter.net>
+Author: László Mátyás <matyas@ceu.hu>, László Balázsi
+    <balazsi_laszlo@ceu-budapest.edu> and Gergely Daróczi
+    <daroczig@rapporter.net>
+Title: Within estimators for fixed effects panel data
+Description: R implementation of the most frequently used three-dimensional
+    fixed effects panel data models the appropriate Within estimators.
+Type: Package
+Encoding: UTF-8
+Version: 0.1
+Date: 2014-04-28
+License: AGPL-3

@@ -11,3 +11,6 @@ Encoding: UTF-8
 Version: 0.1
 Date: 2014-04-28
 License: AGPL-3
+Depends:
+    Matrix,
+    MASS

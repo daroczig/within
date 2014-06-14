@@ -3,6 +3,7 @@
 export(OLSonTransformation)
 export(WithinTransformation1)
 export(WithinTransformation1b)
+export(WithinTransformation1c)
 export(WithinTransformation2)
 export(WithinTransformation2b)
 export(WithinTransformation3)

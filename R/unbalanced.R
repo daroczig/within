@@ -48,15 +48,13 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     It  <- sparseMatrix(1:dim(D1)[1], 1:dim(D1)[1], x = 1)
     Qa <- t(D2) %*% Da
 
-    ## geninv of Qa
-    if (require('rfunctions'))
+    ## Moore–Penrose pseudoinverse of Qa
+    if (require('rfunctions')) {
         Qai <- geninv(as.matrix(Qa))
-    else
+    } else {
         Qai <- ginv(as.matrix(Qa))
+    }
     Qai <- Matrix(Qai)
-
-    ## full value (added NA)
-    fulli <- rep(NA, )
 
     ## this should work on smaller matrices (formula 22)
     ## Pa <- (It - (D1 %*% dN2i %*% t(D1))) - (Da %*% Qai %*% t(Da))
@@ -69,6 +67,127 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
 
     res <- sapply(1:length(value), function(index) {
         value[index] - mean(value[which(i == i[index] & j == j[index])]) - fia[as.numeric(t[index])]
+    })
+
+}
+#' @export
+WithinTransformation2c <- WithinTransformation2
+#' @export
+WithinTransformation3c <- WithinTransformation3
+#' @export
+WithinTransformation4c <- WithinTransformation4
+#' @export
+WithinTransformation5c <- WithinTransformation5
+#' @export
+WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m[, 4:ncol(m)], m)  { # formula (23)
+
+    M <- cbind(i, j, t, value)
+
+    n  <- length(levels(i))
+    nt <- length(unique(t))
+
+    v <- sparseMatrix(1:n^2, 1:n^2, x = 1)
+    a <- apply(expand.grid(levels(i), levels(i)), 1, paste, collapse = '-')
+    Vs <- lapply(setNames(unique(t), unique(t)), function(x) {
+        w <- which(t == x)
+        r <- which(a %in% paste(i[w], j[w], sep = '-'))
+        structure(v[r, ], .Names = x)
+    })
+    D1 <- do.call(rBind, Vs)
+
+    In <- sparseMatrix(1:n, 1:n, x = 1)
+    ln <- rep(1, n)
+    Us <- lapply(unique(t), function(x) {
+        w <- which(t == x)
+        r <- which(a %in% paste(i[w], j[w], sep = '-'))
+        kronecker(In, ln)[r, ]
+    })
+    Ws <- lapply(unique(t), function(x) {
+        w <- which(t == x)
+        r <- which(a %in% paste(i[w], j[w], sep = '-'))
+        kronecker(ln, In)[r, ]
+    })
+
+    l  <- sapply(Us, function(x) x@Dim)
+    l  <- cbind(c(1,1), l)
+    D3 <- D2 <- Matrix(0, nrow = sum(l[1, ])-1, ncol = sum(l[2, ])-1)
+    for (index in 1:nt) {
+        rstart <- cumsum(l[1, ])[index]
+        cstart <- cumsum(l[2, ])[index]
+        D2[rstart:(rstart-1+l[1, ][index+1]), cstart:(cstart-1+l[2, ][index+1])] <- Us[[index]]
+        D3[rstart:(rstart-1+l[1, ][index+1]), cstart:(cstart-1+l[2, ][index+1])] <- Ws[[index]]
+    }
+
+    ## helper matrix for inverse
+    D1tD1 <- t(D1) %*% D1
+    ix <- union(which(rowSums(D1tD1) > 0), which(colSums(D1tD1) > 0))
+    D1tD1i <- D1tD1
+    D1tD1i[ix, ix] <- solve(D1tD1[ix, ix])
+
+    It <- sparseMatrix(1:dim(D1)[1], 1:dim(D1)[1], x = 1)
+    B <- It - (D1 %*% D1tD1i %*% t(D1))
+
+    ## another helper matrix
+    BD2ti <- BD2t <- t(B %*% D2) %*% (B %*% D2)
+    ix <- union(which(rowSums(BD2t) > 0), which(colSums(BD2t) > 0))
+    if (require('rfunctions')) {
+        BD2ti[ix, ix] <- geninv(as.matrix(BD2ti[ix, ix]))
+    } else {
+        BD2ti[ix, ix] <- ginv(as.matrix(BD2ti[ix, ix]))
+    }
+
+    C <- B - (B %*% D2) %*% BD2ti %*% t(B %*% D2)
+
+    Db <- (It - D1 %*% D1tD1i %*% t(D1)) %*% D2
+    Qb <- t(D2) %*% Db
+
+    ## Moore–Penrose pseudoinverse of Qb
+    ix <- union(which(rowSums(Qb) > 0), which(colSums(Qb) > 0))
+    Qbi <- Qb
+    if (require('rfunctions')) {
+        Qbi[ix, ix] <- geninv(as.matrix(Qb[ix, ix]))
+    } else {
+        Qbi[ix, ix] <- ginv(as.matrix(Qb[ix, ix]))
+    }
+
+    fib <- Qbi %*% t(Db) %*% value
+
+    Qi <- Q <- t(C %*% D3) %*% (C %*% D3)
+
+    ## Qb and the Moore–Penrose pseudoinverse of Qb
+    ix <- union(which(rowSums(Q) > 0), which(colSums(Q) > 0))
+    if (require('rfunctions')) {
+        Qi[ix, ix] <- geninv(as.matrix(Q[ix, ix]))
+    } else {
+        Qi[ix, ix] <- ginv(as.matrix(Q[ix, ix]))
+    }
+
+    ## omega
+    o <- Qi %*% t(C %*% D3) %*% value
+
+    ## xi
+    k <- Qbi %*% t(Db) %*% D3 %*% o
+
+    Ab <- t(D2) %*% D1
+    A  <- t(D3) %*% D1
+
+    aij <- apply(expand.grid(seq_len(n), seq_len(n)), 1, paste, collapse = '-') ## TODO: verify order and the similar approaches above
+    ait <- apply(expand.grid(seq_len(n), seq_len(nt)), 1, paste, collapse = '-')
+
+    t <- as.numeric(factor(t))
+    i <- as.numeric(i)
+    j <- as.numeric(j)
+
+    res <- sapply(1:length(value), function(index) {
+        wij <- which(paste(i[index], j[index], sep = '-') == aij)
+        wit <- which(paste(i[index], t[index], sep = '-') == ait)
+        wjt <- which(paste(j[index], t[index], sep = '-') == ait)
+        Tij <- length(which(i == i[index] & j == j[index]))
+        value[index] -
+            mean(value[which(i == i[index] & j == j[index])]) -
+                (Ab[, wij] %*% fib) / Tij - fib[wit] - o[wjt] +
+                    (t(A[, wij]) %*% o) / Tij + k[wit, ] -
+                        (t(Ab[, wij]) %*% k) / Tij
     })
 
 }

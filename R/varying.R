@@ -5,7 +5,10 @@
 #' @return numeric value of OLS beta
 varyingModel1 <- function(mx, my) {
 
-    ## TODO: generalize to work if K>1
+    if (nrow(mx) != nrow(my))
+        stop('incompatible matrices provided')
+    if (!identical(mx[, 1:3], mx[, 1:3]))
+        stop('incompatible matrices provided')
 
     l <- levels(mx[, 1])
     N <- length(l)

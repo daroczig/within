@@ -10,6 +10,7 @@ varyingModel1 <- function(mx, my) {
     l <- levels(mx[, 1])
     N <- length(l)
     T <- length(unique(mx[, 3]))
+    K <- ncol(mx) - 3
 
     ## sort data by i, j, t
     mx <- mx[order(mx[, 1], mx[, 2], mx[, 3]), ]
@@ -18,18 +19,34 @@ varyingModel1 <- function(mx, my) {
         lapply(structure(l, .Names = l), function(j) {
             sum(sapply(1:T, function(t) {
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
-                mx[w, 4] * t(mx[w, 4])
+                mx[w, 3+(1:K)] * t(mx[w, 3+(1:K)])
             }))
         })
     }) ## N x N
     Cxx <- Reduce('+', lapply(unlist(Aij, recursive = FALSE), solve))
 
-    ## MX <- N^2 %*% t(mx[, 4]) %*% solve(Aij) %*% solve(Cxx)
     MX <- as.vector(sapply(l, function(i) {
         sapply(l, function(j) {
             sapply(1:T, function(t) {
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
-                N^2 %*% t(mx[w, 4]) %*% solve(Aij[[i]][[j]]) %*% solve(Cxx)
+                N^2 %*% t(mx[w, 3+(1:K)]) %*% solve(Aij[[i]][[j]]) %*% solve(Cxx)
+            })})})) ## TODO check order
+
+    Bij <- lapply(structure(l, .Names = l), function(i) {
+        lapply(structure(l, .Names = l), function(j) {
+            sum(sapply(1:T, function(t) {
+                w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
+                mx[w, 3+(1:K)] * my[w, 4]
+            }))
+        })
+    })
+    Cxy <- sum(mapply(function(x, y) solve(x) %*% y, unlist(Aij, recursive = FALSE), unlist(Bij, recursive = FALSE)))
+
+    MY <- as.vector(sapply(l, function(i) {
+        sapply(l, function(j) {
+            sapply(1:T, function(t) {
+                w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
+                my[w, 4] - t(mx[w, 3+(1:K)]) %*% ((solve(Aij[[i]][[j]]) %*% Bij[[i]][[j]]) - (solve(Aij[[i]][[j]]) %*% solve(Cxx) %*% Cxy))
             })})})) ## TODO check order
 
 }

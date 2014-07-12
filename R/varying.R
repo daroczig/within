@@ -52,4 +52,7 @@ varyingModel1 <- function(mx, my) {
                 my[w, 4] - t(mx[w, 3+(1:K)]) %*% ((solve(Aij[[i]][[j]]) %*% Bij[[i]][[j]]) - (solve(Aij[[i]][[j]]) %*% solve(Cxx) %*% Cxy))
             })})})) ## TODO check order
 
+    ## OLS
+    solve(t(MX) %*% as.matrix(MX)) %*% t(MX) %*% as.matrix(MY)
+
 }

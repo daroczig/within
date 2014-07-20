@@ -21,7 +21,7 @@ varyingModel1 <- function(mx, my) {
 
     Aij <- lapply(structure(l, .Names = l), function(i) {
         lapply(structure(l, .Names = l), function(j) {
-            sum(sapply(1:T, function(t) {
+            sum(sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 mx[w, 3+(1:K)] * t(mx[w, 3+(1:K)])
             }))
@@ -31,14 +31,14 @@ varyingModel1 <- function(mx, my) {
 
     MX <- as.vector(sapply(l, function(i) {
         sapply(l, function(j) {
-            sapply(1:T, function(t) {
+            sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 N^2 %*% t(mx[w, 3+(1:K)]) %*% solve(Aij[[i]][[j]]) %*% solve(Cxx)
             })})})) ## TODO check order
 
     Bij <- lapply(structure(l, .Names = l), function(i) {
         lapply(structure(l, .Names = l), function(j) {
-            sum(sapply(1:T, function(t) {
+            sum(sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 mx[w, 3+(1:K)] * my[w, 4]
             }))
@@ -48,7 +48,7 @@ varyingModel1 <- function(mx, my) {
 
     MY <- as.vector(sapply(l, function(i) {
         sapply(l, function(j) {
-            sapply(1:T, function(t) {
+            sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 my[w, 4] - t(mx[w, 3+(1:K)]) %*% ((solve(Aij[[i]][[j]]) %*% Bij[[i]][[j]]) - (solve(Aij[[i]][[j]]) %*% solve(Cxx) %*% Cxy))
             })})})) ## TODO check order
@@ -82,7 +82,7 @@ varyingModel3 <- function(mx, my, mz) {
 
     Aij <- lapply(structure(l, .Names = l), function(i) {
         lapply(structure(l, .Names = l), function(j) {
-            sum(sapply(1:T, function(t) {
+            sum(sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 mx[w, 3+(1:K)] * t(mx[w, 3+(1:K)])
             }))
@@ -92,14 +92,14 @@ varyingModel3 <- function(mx, my, mz) {
 
     MX <- as.vector(sapply(l, function(i) {
         sapply(l, function(j) {
-            sapply(1:T, function(t) {
+            sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 N^2 %*% t(mx[w, 3+(1:K)]) %*% solve(Aij[[i]][[j]]) %*% solve(Cxx)
             })})})) ## TODO check order
 
     Bij <- lapply(structure(l, .Names = l), function(i) {
         lapply(structure(l, .Names = l), function(j) {
-            sum(sapply(1:T, function(t) {
+            sum(sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 mx[w, 3+(1:K)] * my[w, 4]
             }))
@@ -109,14 +109,14 @@ varyingModel3 <- function(mx, my, mz) {
 
     MY <- as.vector(sapply(l, function(i) {
         sapply(l, function(j) {
-            sapply(1:T, function(t) {
+            sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 my[w, 4] - t(mx[w, 3+(1:K)]) %*% ((solve(Aij[[i]][[j]]) %*% Bij[[i]][[j]]) - (solve(Aij[[i]][[j]]) %*% solve(Cxx) %*% Cxy))
             })})})) ## TODO check order
 
     Dij <- lapply(structure(l, .Names = l), function(i) {
         lapply(structure(l, .Names = l), function(j) {
-            sum(sapply(1:T, function(t) {
+            sum(sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 mx[w, 3+(1:K)] * t(mz[w, 4])
             }))
@@ -126,7 +126,7 @@ varyingModel3 <- function(mx, my, mz) {
 
     MZ <- as.vector(sapply(l, function(i) {
         sapply(l, function(j) {
-            sapply(1:T, function(t) {
+            sapply(1:T, function(t) { ## TODO 1:T => factor
                 w <- which(mx[, 1] == i & mx[, 2] == j & mx[, 3] == t)
                 t(mz[w, 4]) - t(mx[w, 3+(1:K)]) %*% ((solve(Aij[[i]][[j]]) %*% Dij[[i]][[j]]) - (solve(Aij[[i]][[j]]) %*% solve(Cxx) %*% Cxz))
             })})})) ## TODO check order

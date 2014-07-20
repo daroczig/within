@@ -14,6 +14,7 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
 
     M <- cbind(i, j, t, value)
 
+    ## TODO: check if i and j are factors (in other functions as well)
     n  <- length(levels(i))
     nt <- length(unique(t))
 

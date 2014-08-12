@@ -12,7 +12,7 @@ The package is not on CRAN yet, but he most recent version is hosted on [GitHub]
 
 ```
 library(devtools)
-install_github('within', daroczig')
+install_github('within', 'daroczig')
 ```
 
 Or download the [sources in a zip file](https://github.com/daroczig/within/archive/master.zip) and build manually. To do so, please unzip the file to an empty dir and run the following commands there:

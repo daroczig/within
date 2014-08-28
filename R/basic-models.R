@@ -20,7 +20,7 @@ OLSonTransformation <- function(mx, my, transformation) {
     ## remove transformed vars with zero variance
     na <- which(apply(mx[, 4:ncol(mx)], 2, var) == 0)
     if (length(na) > 0) {
-        mx[, -(na+3)] <- NA
+        mx <- mx[, -(na+3)]
     }
     solve(t(mx) %*% as.matrix(mx)) %*% t(mx) %*% as.matrix(my)
 }

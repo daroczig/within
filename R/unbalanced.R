@@ -70,6 +70,8 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
         value[index] - mean(value[which(i == i[index] & j == j[index])]) - fia[as.numeric(t[index])]
     })
 
+    res
+
 }
 #' @export
 WithinTransformation2c <- WithinTransformation2
@@ -190,5 +192,7 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
                     (t(A[, wij]) %*% o) / Tij + k[wit, ] -
                         (t(Ab[, wij]) %*% k) / Tij
     })
+
+    res
 
 }

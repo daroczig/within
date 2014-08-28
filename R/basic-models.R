@@ -11,18 +11,37 @@
 #' OLSonTransformation(my, mx, WithinTransformation2)
 #' }
 OLSonTransformation <- function(mx, my, transformation) {
+
+    ## transform
     my <- transformation(m = my)
     if (require(parallel) & ncol(mx) > 4) {
         mx <- simplify2array(mclapply(4:ncol(mx), function(i) transformation(m = mx[, c(1:3, i)])))
     } else {
         mx <- sapply(4:ncol(mx), function(i) transformation(m = mx[, c(1:3, i)]))
     }
+
+    ## helper vars
+    nval <- ncol(mx)
+
     ## remove transformed vars with zero variance
-    na <- which(apply(mx[, 4:ncol(mx)], 2, var) == 0)
+    na <- which(apply(mx, 2, var) == 0)
     if (length(na) > 0) {
-        mx <- mx[, -(na+3)]
+        mx <- mx[, -na]
     }
-    solve(t(mx) %*% as.matrix(mx)) %*% t(mx) %*% as.matrix(my)
+
+    ## compute
+    res <- solve(t(mx) %*% as.matrix(mx)) %*% t(mx) %*% as.matrix(my)
+
+    ## add NA beta coefficient for variables with zero variance
+    if (length(na) > 0) {
+        betas <- matrix(NA, nval, 1)
+        betas[setdiff(1:nval, na), 1] <- res
+    } else {
+        betas <- res
+    }
+
+    ## return
+    betas
 }
 
 
@@ -45,6 +64,15 @@ OLSonTransformation <- function(mx, my, transformation) {
 WithinTransformation1 <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m[, 4:ncol(m)], m) # model (1) formula (3)
     value - yi..() - y.j.() - y..t() + 2*y...()
 #' @export
+#' @param i
+#' @param 1]
+#' @param j
+#' @param 2]
+#' @param t
+#' @param 3]
+#' @param value
+#' @param 4:ncol]
+#' @param m
 WithinTransformation2 <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m[, 4:ncol(m)], m) # model (5) formula (6)
     value - yij.()
 #' @export

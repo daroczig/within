@@ -12,7 +12,11 @@
 #' }
 OLSonTransformation <- function(mx, my, transformation) {
     my <- transformation(m = my)
-    mx <- sapply(4:ncol(mx), function(i) transformation(m = mx[, c(1:3, i)]))
+    if (require(parallel) & ncol(mx) > 4) {
+        mx <- simplify2array(mclapply(4:ncol(mx), function(i) transformation(m = mx[, c(1:3, i)])))
+    } else {
+        mx <- sapply(4:ncol(mx), function(i) transformation(m = mx[, c(1:3, i)]))
+    }
     solve(t(mx) %*% as.matrix(mx)) %*% t(mx) %*% as.matrix(my)
 }
 

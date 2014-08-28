@@ -15,4 +15,5 @@ Depends:
     Matrix,
     MASS
 Suggests:
+    parallel,
     rfunctions

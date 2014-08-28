@@ -17,11 +17,10 @@ OLSonTransformation <- function(mx, my, transformation) {
     } else {
         mx <- sapply(4:ncol(mx), function(i) transformation(m = mx[, c(1:3, i)]))
     }
-    if (ncol(mx) > 4) {
-        na <- which(apply(mx, 2, var) == 0)
-        if (length(na) > 0) {
-            mx[, na] <- NA
-        }
+    ## remove transformed vars with zero variance
+    na <- which(apply(mx[, 4:ncol(mx)], 2, var) == 0)
+    if (length(na) > 0) {
+        mx[, -(na+3)] <- NA
     }
     solve(t(mx) %*% as.matrix(mx)) %*% t(mx) %*% as.matrix(my)
 }

@@ -35,20 +35,20 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
 
     D2 <- sparseMatrix(1:length(js), js, x = 1)
 
-    dN2 <- t(D1) %*% D1 ## Matrix::tcrossprod
+    dN2 <- Matrix::t(D1) %*% D1 ## Matrix::tcrossprod
 
     ## inverse of dN2 with reduced number of cells
     ix <- union(which(rowSums(dN2) > 0), which(colSums(dN2) > 0))
     dN2i <- dN2
     dN2i[ix, ix] <- solve(dN2[ix, ix])
 
-    Aa  <- t(D2) %*% D1
-    Da <- D2 - (D1 %*% dN2i %*% t(Aa))
+    Aa  <- Matrix::t(D2) %*% D1
+    Da <- D2 - (D1 %*% dN2i %*% Matrix::t(Aa))
 
 
-    dTx <- t(D2) %*% D2
+    dTx <- Matrix::t(D2) %*% D2
     It  <- sparseMatrix(1:dim(D1)[1], 1:dim(D1)[1], x = 1)
-    Qa <- t(D2) %*% Da
+    Qa <- Matrix::t(D2) %*% Da
 
     ## Moore–Penrose pseudoinverse of Qa
     if (require('rfunctions')) {
@@ -61,7 +61,7 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     ## this should work on smaller matrices (formula 22)
     ## Pa <- (It - (D1 %*% dN2i %*% t(D1))) - (Da %*% Qai %*% t(Da))
 
-    fia <- Qai %*% t(Da) %*% value
+    fia <- Qai %*% Matrix::t(Da) %*% value
 
     t <- as.numeric(factor(t))
     i <- as.numeric(i)
@@ -126,16 +126,16 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     }
 
     ## helper matrix for inverse
-    D1tD1 <- t(D1) %*% D1
+    D1tD1 <- Matrix::t(D1) %*% D1
     ix <- union(which(rowSums(D1tD1) > 0), which(colSums(D1tD1) > 0))
     D1tD1i <- D1tD1
     D1tD1i[ix, ix] <- solve(D1tD1[ix, ix])
 
     It <- sparseMatrix(1:dim(D1)[1], 1:dim(D1)[1], x = 1)
-    B <- It - (D1 %*% D1tD1i %*% t(D1))
+    B <- It - (D1 %*% D1tD1i %*% Matrix::t(D1))
 
     ## another helper matrix
-    BD2ti <- BD2t <- t(B %*% D2) %*% (B %*% D2)
+    BD2ti <- BD2t <- Matrix::t(B %*% D2) %*% (B %*% D2)
     ix <- union(which(rowSums(BD2t) > 0), which(colSums(BD2t) > 0))
     if (require('rfunctions')) {
         BD2ti[ix, ix] <- geninv(as.matrix(BD2ti[ix, ix]))
@@ -143,10 +143,10 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
         BD2ti[ix, ix] <- ginv(as.matrix(BD2ti[ix, ix]))
     }
 
-    C <- B - (B %*% D2) %*% BD2ti %*% t(B %*% D2)
+    C <- B - (B %*% D2) %*% BD2ti %*% Matrix::t(B %*% D2)
 
-    Db <- (It - D1 %*% D1tD1i %*% t(D1)) %*% D2
-    Qb <- t(D2) %*% Db
+    Db <- (It - D1 %*% D1tD1i %*% Matrix::t(D1)) %*% D2
+    Qb <- Matrix::t(D2) %*% Db
 
     ## Moore–Penrose pseudoinverse of Qb
     ix <- union(which(rowSums(Qb) > 0), which(colSums(Qb) > 0))
@@ -157,9 +157,9 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
         Qbi[ix, ix] <- ginv(as.matrix(Qb[ix, ix]))
     }
 
-    fib <- Qbi %*% t(Db) %*% value
+    fib <- Qbi %*% Matrix::t(Db) %*% value
 
-    Qi <- Q <- t(C %*% D3) %*% (C %*% D3)
+    Qi <- Q <- Matrix::t(C %*% D3) %*% (C %*% D3)
 
     ## Qb and the Moore–Penrose pseudoinverse of Qb
     ix <- union(which(rowSums(Q) > 0), which(colSums(Q) > 0))
@@ -170,13 +170,13 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     }
 
     ## omega
-    o <- Qi %*% t(C %*% D3) %*% value
+    o <- Qi %*% Matrix::t(C %*% D3) %*% value
 
     ## xi
-    k <- Qbi %*% t(Db) %*% D3 %*% o
+    k <- Qbi %*% Matrix::t(Db) %*% D3 %*% o
 
-    Ab <- t(D2) %*% D1
-    A  <- t(D3) %*% D1
+    Ab <- Matrix::t(D2) %*% D1
+    A  <- Matrix::t(D3) %*% D1
 
     aij <- apply(expand.grid(seq_len(n), seq_len(n)), 1, paste, collapse = '-') ## TODO: verify order and the similar approaches above
     ait <- apply(expand.grid(seq_len(n), seq_len(nt)), 1, paste, collapse = '-')
@@ -193,8 +193,8 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
         value[index] -
             mean(value[which(i == i[index] & j == j[index])]) -
                 (Ab[, wij] %*% fib) / Tij - fib[wit] - o[wjt] +
-                    (t(A[, wij]) %*% o) / Tij + k[wit, ] -
-                        (t(Ab[, wij]) %*% k) / Tij
+                    (Matrix::t(A[, wij]) %*% o) / Tij + k[wit, ] -
+                        (Matrix::t(Ab[, wij]) %*% k) / Tij
     })
 
     res

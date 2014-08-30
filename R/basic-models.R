@@ -64,15 +64,6 @@ OLSonTransformation <- function(mx, my, transformation) {
 WithinTransformation1 <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m[, 4:ncol(m)], m) # model (1) formula (3)
     value - yi..() - y.j.() - y..t() + 2*y...()
 #' @export
-#' @param i
-#' @param 1]
-#' @param j
-#' @param 2]
-#' @param t
-#' @param 3]
-#' @param value
-#' @param 4:ncol]
-#' @param m
 WithinTransformation2 <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m[, 4:ncol(m)], m) # model (5) formula (6)
     value - yij.()
 #' @export

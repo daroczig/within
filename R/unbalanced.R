@@ -9,7 +9,7 @@
 #' @return vector
 #' @references László Balázsi, László Mátyás and Tom Wansbeek (2014): The Estimation of Multi-dimensional Fixed Effects Panel Data Models. Formula (22) and (23).
 #' @export
-#' @importFrom Matrix t
+#' @importFrom Matrix t rowSums colSums
 #' @aliases WithinTransformation1c WithinTransformation2c WithinTransformation3c WithinTransformation4c WithinTransformation5c WithinTransformation6c
 WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m[, 4:ncol(m)], m)  { # formula (22)
 
@@ -38,7 +38,7 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     dN2 <- Matrix::t(D1) %*% D1 ## Matrix::tcrossprod
 
     ## inverse of dN2 with reduced number of cells
-    ix <- union(which(rowSums(dN2) > 0), which(colSums(dN2) > 0))
+    ix <- union(which(Matrix::rowSums(dN2) > 0), which(Matrix::colSums(dN2) > 0))
     dN2i <- dN2
     dN2i[ix, ix] <- solve(dN2[ix, ix])
 
@@ -127,7 +127,7 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
 
     ## helper matrix for inverse
     D1tD1 <- Matrix::t(D1) %*% D1
-    ix <- union(which(rowSums(D1tD1) > 0), which(colSums(D1tD1) > 0))
+    ix <- union(which(Matrix::rowSums(D1tD1) > 0), which(Matrix::colSums(D1tD1) > 0))
     D1tD1i <- D1tD1
     D1tD1i[ix, ix] <- solve(D1tD1[ix, ix])
 
@@ -136,7 +136,7 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
 
     ## another helper matrix
     BD2ti <- BD2t <- Matrix::t(B %*% D2) %*% (B %*% D2)
-    ix <- union(which(rowSums(BD2t) > 0), which(colSums(BD2t) > 0))
+    ix <- union(which(Matrix::rowSums(BD2t) > 0), which(Matrix::colSums(BD2t) > 0))
     if (require('rfunctions')) {
         BD2ti[ix, ix] <- geninv(as.matrix(BD2ti[ix, ix]))
     } else {
@@ -149,7 +149,7 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     Qb <- Matrix::t(D2) %*% Db
 
     ## Moore–Penrose pseudoinverse of Qb
-    ix <- union(which(rowSums(Qb) > 0), which(colSums(Qb) > 0))
+    ix <- union(which(Matrix::rowSums(Qb) > 0), which(Matrix::colSums(Qb) > 0))
     Qbi <- Qb
     if (require('rfunctions')) {
         Qbi[ix, ix] <- geninv(as.matrix(Qb[ix, ix]))
@@ -162,7 +162,7 @@ WithinTransformation6c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     Qi <- Q <- Matrix::t(C %*% D3) %*% (C %*% D3)
 
     ## Qb and the Moore–Penrose pseudoinverse of Qb
-    ix <- union(which(rowSums(Q) > 0), which(colSums(Q) > 0))
+    ix <- union(which(Matrix::rowSums(Q) > 0), which(Matrix::colSums(Q) > 0))
     if (require('rfunctions')) {
         Qi[ix, ix] <- geninv(as.matrix(Q[ix, ix]))
     } else {

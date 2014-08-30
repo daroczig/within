@@ -9,6 +9,7 @@
 #' @return vector
 #' @references László Balázsi, László Mátyás and Tom Wansbeek (2014): The Estimation of Multi-dimensional Fixed Effects Panel Data Models. Formula (22) and (23).
 #' @export
+#' @importFrom Matrix t
 #' @aliases WithinTransformation1c WithinTransformation2c WithinTransformation3c WithinTransformation4c WithinTransformation5c WithinTransformation6c
 WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m[, 4:ncol(m)], m)  { # formula (22)
 
@@ -34,7 +35,7 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
 
     D2 <- sparseMatrix(1:length(js), js, x = 1)
 
-    dN2 <- t(D1) %*% D1
+    dN2 <- t(D1) %*% D1 ## Matrix::tcrossprod
 
     ## inverse of dN2 with reduced number of cells
     ix <- union(which(rowSums(dN2) > 0), which(colSums(dN2) > 0))
@@ -66,6 +67,9 @@ WithinTransformation1c <- function(i = m[, 1], j = m[, 2], t = m[, 3], value = m
     i <- as.numeric(i)
     j <- as.numeric(j)
 
+    ## res <- simplify2array(mclapply(1:length(value), function(index) {
+    ##     value[index] - mean(value[which(i == i[index] & j == j[index])]) - fia[as.numeric(t[index])]
+    ## }))
     res <- sapply(1:length(value), function(index) {
         value[index] - mean(value[which(i == i[index] & j == j[index])]) - fia[as.numeric(t[index])]
     })

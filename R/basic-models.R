@@ -10,18 +10,29 @@
 #' OLSonTransformation(mx, my, WithinTransformation2)
 #' OLSonTransformation(my, mx, WithinTransformation2)
 #' }
-OLSonTransformation <- function(mx, my, transformation) {
+#' @importFrom digest digest
+OLSonTransformation <- function(mx, my, transformation, checkpointing = FALSE) {
 
     ## transform
     my <- transformation(m = my)
+    pd <- digest(list(my, transformation), algo = 'sha1')
+    if (isTRUE(checkpointing))
+        saveRDS(my, paste0('my-', pd))
     if (require(parallel) & ncol(mx) > 4) {
-        mx <- simplify2array(mclapply(4:ncol(mx), function(i) transformation(m = mx[, c(1:3, i)])))
+        mx <- simplify2array(mclapply(4:ncol(mx), function(i) {
+            r <- transformation(m = mx[, c(1:3, i)])
+            pd <- digest(list(mx[, c(1:3, i)], transformation), algo = 'sha1')
+            if (isTRUE(checkpointing))
+                saveRDS(r, paste0('mx-', names(mx)[i], '-', pd))
+            r
+        }))
     } else {
         mx <- sapply(4:ncol(mx), function(i) transformation(m = mx[, c(1:3, i)]))
     }
 
     ## helper vars
     nval <- ncol(mx)
+    MX <- mx
 
     ## remove transformed vars with zero variance
     na <- which(apply(mx, 2, var) == 0)
@@ -39,6 +50,10 @@ OLSonTransformation <- function(mx, my, transformation) {
     } else {
         betas <- res
     }
+
+    ## standard error
+    ## ( y - Xb )' * ( y - Xb ) * (X'X)^(-1)/(samplesize-18)
+    ## stderrs <- my - (MX %*% betas)
 
     ## return
     betas

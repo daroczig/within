@@ -13,7 +13,7 @@
 #' @importFrom digest digest
 OLSonTransformation <- function(mx, my, transformation, checkpointing = FALSE) {
 
-    mxn <- tail(names(mx), 3)
+    mxn <- tail(names(mx), -3)
 
     ## transform
     my <- transformation(m = my)

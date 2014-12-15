@@ -50,9 +50,7 @@ OLSonTransformation <- function(mx, my, transformation, checkpointing = FALSE) {
     se <- sqrt(diag(se))
 
     ## R squared
-    ## r2 <- t(mx %*% betas) %*% (mx %*% betas) / t(my) %*% my
-    r2 <- sapply(1:length(b), function(i)
-           t(mx[, i, drop = FALSE] %*% b[i]) %*% (mx[, i, drop = FALSE] %*% b[i]) / t(my) %*% my)
+    r2 <- t(mx %*% b) %*% (mx %*% b) / t(my) %*% my
 
     ## add NA beta coefficient for variables with zero variance
     reAddNA <- function(v) {
@@ -63,7 +61,6 @@ OLSonTransformation <- function(mx, my, transformation, checkpointing = FALSE) {
     if (length(na) > 0) {
         b  <- reAddNA(b)
         se <- reAddNA(se)
-        r2 <- reAddNA(r2)
     }
 
     ## return

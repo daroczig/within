@@ -13,6 +13,8 @@
 #' @importFrom digest digest
 OLSonTransformation <- function(mx, my, transformation, checkpointing = FALSE) {
 
+    mxn <- tail(names(mx), 3)
+
     ## transform
     my <- transformation(m = my)
     pd <- digest(list(my, transformation), algo = 'sha1')
@@ -40,23 +42,33 @@ OLSonTransformation <- function(mx, my, transformation, checkpointing = FALSE) {
         mx <- mx[, -na]
     }
 
-    ## compute
-    res <- solve(t(mx) %*% as.matrix(mx)) %*% t(mx) %*% as.matrix(my)
-
-    ## add NA beta coefficient for variables with zero variance
-    if (length(na) > 0) {
-        betas <- matrix(NA, nval, 1)
-        betas[setdiff(1:nval, na), 1] <- res
-    } else {
-        betas <- res
-    }
+    ## beta
+    b <- solve(t(mx) %*% as.matrix(mx)) %*% t(mx) %*% as.matrix(my)
 
     ## standard error
-    ## ( y - Xb )' * ( y - Xb ) * (X'X)^(-1)/(samplesize-18)
-    ## stderrs <- my - (MX %*% betas)
+    se <- as.numeric(t(my - mx %*% b) %*% (my - mx %*% b)) * solve(t(mx) %*% mx) / (nrow(mx) - ncol(mx))
+    se <- sqrt(diag(se))
+
+    ## R squared
+    ## r2 <- t(mx %*% betas) %*% (mx %*% betas) / t(my) %*% my
+    r2 <- sapply(1:length(b), function(i)
+           t(mx[, i, drop = FALSE] %*% b[i]) %*% (mx[, i, drop = FALSE] %*% b[i]) / t(my) %*% my)
+
+    ## add NA beta coefficient for variables with zero variance
+    reAddNA <- function(v) {
+        t <- matrix(NA, nval, 1)
+        t[setdiff(1:nval, na), 1] <- v
+        t
+    }
+    if (length(na) > 0) {
+        b  <- reAddNA(b)
+        se <- reAddNA(se)
+        r2 <- reAddNA(r2)
+    }
 
     ## return
-    betas
+    data.frame(beta = b, se = se, r2 = r2, row.names = mxn)
+
 }
 
 
